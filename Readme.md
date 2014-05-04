@@ -15,24 +15,25 @@
 The option method's signature is  
 
 ```js
-  .option( flags,  // A string describing the options short and long names as well as optional modifer 
+  .option( flags,  // A string describing the options short and long names as well as an optional modifer 
                    // that assigns rules to the option  
                    //
                    // <type> required -- option must be present on command line, [def] if provided will be ignored 
                    // [type] optional -- option may be excluded, [def] should be provided else the value will be
                    // undefined
                    //
-                   // 'type' has no effect on how the option is processed unless [fn] is provided, the contents
-                   // is typcially simply used to document the option.  See examples
+                   // 'type' has no effect on how the option is processed but is passed to [fn] if present, 
+                   // therefore the content is typcially used to document the option.  See examples
                    //
-                   // If neither modifier is present the option is cnsidered to be a switch, if the option flag                          // is present the value will be true, otherwiese false, [def] if provided is ignored since 
+                   // If neither modifier is present the option is ccnsidered to be a switch, if the option 
+                   // is present the value will be true, otherwise false, [def] if provided is ignored since 
                    // the default for this type ( not used ) will always be false 
                    
                    
            desc ,  // A description of the option that is printed out when --help or -h is used 
            
-          [fn  ],  // An optional funciton that is passed the value and anything in the <> || [] if present
-                   // the function can return a modifed value to coninue, or an Error(msg) to terminate the 
+          [fn  ],  // An optional function that is passed the value and anything in the <> || [] modifier blocks
+                   // The function can return a corece value to coninue, or an Error(msg) to terminate the 
                    // processing
                    
           [def ],  // A default value that will be used if the option is not required, ENV:name:def for this 
