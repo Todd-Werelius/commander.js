@@ -11,6 +11,38 @@
 ## Option parsing
 
  Options with commander are defined with the `.option()` method, also serving as documentation for the options. The example below parses args and options from `process.argv`, leaving remaining args as the `program.args` array which were not consumed by options.
+ 
+The option method's signature is  
+
+```js
+  .option( flags,  // A string describing the options short and long names as well as optional modifer 
+                   // that assigns rules to the option  
+                   //
+                   // <type> required -- option must be present on command line, [def] if provided will be ignored 
+                   // [type] optional -- option may be excluded, [def] should be provided else the value will be
+                   // undefined
+                   //
+                   // 'type' has no effect on how the option is processed unless [fn] is provided, the contents
+                   // is typcially simply used to document the option.  See examples
+                   //
+                   // If neither modifier is present the option is cnsidered to be a switch, if the option flag                          // is present the value will be true, otherwiese false, [def] if provided is ignored since 
+                   // the default for this type ( not used ) will always be false 
+                   
+                   
+           desc ,  // A description of the option that is printed out when --help or -h is used 
+           
+          [fn  ],  // An optional funciton that is passed the value and anything in the <> || [] if present
+                   // the function can return a modifed value to coninue, or an Error(msg) to terminate the 
+                   // processing
+                   
+          [def ],  // A default value that will be used if the option is not required, ENV:name:def for this 
+                   // parameter will extract the option from the 'name' in the enviorment if present
+                   // or use the ':def' section if not, if ':def' section is not specified then it will be 
+                   // undefined
+        
+```
+
+  
 
 ```js
 #!/usr/bin/env node
