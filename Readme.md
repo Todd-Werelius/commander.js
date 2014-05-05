@@ -1,75 +1,104 @@
-# Commander.js
+# cmdline.js
 
-  The complete solution for [node.js](http://nodejs.org) command-line interfaces, inspired by Ruby's [commander](https://github.com/visionmedia/commander).
+  A solution for [node.js](http://nodejs.org) simple command-line parameter parsing and full command-line program support forked from [commander](https://github.com/visionmedia/commander). 
+  
+  This fork provides emphasis on providing more straight forward ( but slightly less flexible ) command line parameter handling and optional user shutdown handling.
+  
 
  [![Build Status](https://api.travis-ci.org/visionmedia/commander.js.svg)](http://travis-ci.org/visionmedia/commander.js)
 
 ## Installation
 
-    $ npm install commander
+    $ npm install cmdline
 
-## Option parsing
-
- Options with commander are defined with the `.option()` method, also serving as documentation for the options. The example below parses args and options from `process.argv`, leaving remaining args as the `program.args` array which were not consumed by options.
- 
-The option method's signature is  
-
-```js
-  .option( flags,  // A string describing the options short and long names as well as an optional modifer 
-                   // that assigns rules to the option  
-                   //
-                   // <type> required -- option must be present on command line, [def] if provided will be ignored 
-                   // [type] optional -- option may be excluded, [def] should be provided else the value will be
-                   // undefined
-                   //
-                   // 'type' has no effect on how the option is processed but is passed to [fn] if present, 
-                   // therefore the content is typcially used to document the option.  See examples
-                   //
-                   // If neither modifier is present the option is ccnsidered to be a switch, if the option 
-                   // is present the value will be true, otherwise false, [def] if provided is ignored since 
-                   // the default for this type ( not used ) will always be false 
-                   
-                   
-           desc ,  // A description of the option that is printed out when --help or -h is used 
-           
-          [fn  ],  // An optional function that is passed the value and anything in the <> || [] modifier blocks
-                   // The function can return a corece value to coninue, or an Error(msg) to terminate the 
-                   // processing
-                   
-          [def ],  // A default value that will be used if the option is not required, ENV:name:def for this 
-                   // parameter will extract the option from the 'name' in the enviorment if present
-                   // or use the ':def' section if not, if ':def' section is not specified then it will be 
-                   // undefined
-        
-```
-
-  
-
+## Parsing command line arguments example
 ```js
 #!/usr/bin/env node
 
-/**
- * Module dependencies.
- */
+var cfg = require('cmdline');
 
-var program = require('commander');
-
-program
+cfg
   .version('0.0.1')
-  .option('-p, --peppers', 'Add peppers')
-  .option('-P, --pineapple', 'Add pineapple')
-  .option('-b, --bbq', 'Add bbq sauce')
-  .option('-c, --cheese [type]', 'Add the specified type of cheese [marble]', 'marble')
-  .parse(process.argv);
+  .usage(' < --url > [-S] [-P] [-T]','node server')
+  .param('-U, --url <URL>', 'URL to parse')                             // A required param 
+  .param('-S, --stripjs', 'Strips out <scripts> from html')              // A switch 
+  .param('-P, --port [PORT]', 'Port server listens on, default is 3000') // Optional param with default
+  .param('-T, --timeout [0]' , 'ms to wait, default is no limit')        // A optional param with no deefault value 
+.parse(process.argv, [function(error)]{
+    // if error is set then soemthing went wrong 
+    // else configure to run ... 
+});
 
-console.log('you ordered a pizza with:');
-if (program.peppers) console.log('  - peppers');
-if (program.pineapple) console.log('  - pineapple');
-if (program.bbq) console.log('  - bbq');
-console.log('  - %s cheese', program.cheese);
 ```
 
- Short flags may be passed as a single arg, for example `-abc` is equivalent to `-a -b -c`. Multi-word options such as "--template-engine" are camel-cased, becoming `program.templateEngine` etc.
+## Method Explantion  
+
+The method explanations assume that the program file is server.js 
+
+### `.version('0.0.2')`
+
+Sets the version. When the -V or --version parameter switch is set this will output to the console and the program will exit
+
+```
+$ node server -V
+v0.0.2
+```
+
+### `.usage(desc,[name])` 
+Sets usage instructions. 'desc' tells the user one or more ways to use the program, optionally you can use 'name'  to overide the program name pre-fix.  When -H or --help switches are used this will be the first line outputed in the automated help
+
+```
+examples;
+
+.usage('-u URL [-p port]')
+  $ node server -h
+  
+    Usage: server -u URL [-p port]
+    .
+    .
+    .
+
+.usage('-u URL [-p port]','node server.js')
+  $ node server -h
+  
+    Usage: node server.js -u URL [-p port]
+    .
+    .
+    .
+  
+```
+
+### `.param(flag,desc,[fn],[defValue])`
+
+Creates a named parameter. The value of the parmeter will be atteched to the cmdline object using the long name of the parameter and can be read using . notation 
+
+ex: cfg.url, cfg.stripjs , cfg.port, cfg.timeout etc.  
+
+
+#### flag 
+A string in the format of `'-shortname, --longname [optional rule]'` the rule identifies the parameter as either a switch, a required value or an optional value. The content within a rule is passed to [fn] if defined but has no meaning to the cmdline parser and is typicaly just used to describe the expected value. 
+
+`parameter('-P, -port <number>',...)` trailing <...> indicates required value
+
+`parameter('-T, -timeout [miliseconds]',...)`  trailing [...] indicates optional value
+
+`parameter('-S, --stripjs',...)` empty ( no <> or [] ) indicates a switch
+
+A required parameter MUST be set by the caller or an error will be generated
+  [defValue] is ignored
+  [fn] is used if defined  
+  
+A optional parameter is not required
+  [defValue] or [fn] if defined will be used to set the value
+  [defValue] or [fn] if UNdefined value will be set to null
+
+A switch parameter if present has it's value set to true, if missing the parmeter will be set to false
+  [defValue] is ignored
+  [fn] is executed if defined but the return value is not used  
+
+ Short flags may be passed as a single arg, for example `-abc` is equivalent to `-a -b -c`. Multi-word options such as "--template-engine" are camel-cased, becoming `templateEngine` etc.
+
+
 
 ## Automated --help
 
@@ -136,7 +165,7 @@ console.log(' args: %j', program.args);
 
 ## Custom help
 
- You can display arbitrary `-h, --help` information
+ You can display custom `-h, --help` information
  by listening for "--help". Commander will automatically
  exit once you are done so that the remainder of your program
  does not execute causing undesired behaviours, for example
