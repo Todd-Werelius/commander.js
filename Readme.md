@@ -19,7 +19,7 @@ var cfg = require('cmdline');
 
 cfg
   .version('0.0.1')
-  .usage(' < --url > [-S] [-P] [-T]','node server')
+  .usage(' --url [-S] [-P] [-T]','node server')
   .param('-U, --url <URL>', 'URL to parse')                             // A required param 
   .param('-S, --stripjs', 'Strips out <scripts> from html')              // A switch 
   .param('-P, --port [PORT]', 'Port server listens on, default is 3000') // Optional param with default
